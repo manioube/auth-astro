@@ -45,20 +45,22 @@ function AstroAuthHandler(prefix: string, options = authConfig) {
 		const url = new URL(request.url)
 		const action = url.pathname.slice(prefix.length + 1).split('/')[0] as AuthAction
 
-		if (!actions.includes(action) || !url.pathname.startsWith(prefix + '/')) return
+		if (!actions.includes(action) || !url.pathname.startsWith(prefix + '/')) {
+			return
+		}
 
-		const res = await Auth(request, options)
+		const res = await Auth(request, options);
 		if (['callback', 'signin', 'signout'].includes(action)) {
 			// Properly handle multiple Set-Cookie headers (they can't be concatenated in one)
-			const getSetCookie = res.headers.getSetCookie()
+			/*const getSetCookie = res.headers.getSetCookie()
 			if (getSetCookie.length > 0) {
 				getSetCookie.forEach((cookie) => {
 					const { name, value, ...options } = parseString(cookie)
 					// Astro's typings are more explicit than @types/set-cookie-parser for sameSite
 					cookies.set(name, value, options as Parameters<(typeof cookies)['set']>[2])
 				})
-				res.headers.delete('Set-Cookie')
-			}
+				res.headers.delete('Set-Cookie') // commented by me
+			}*/
 		}
 		return res
 	}
@@ -94,10 +96,10 @@ export function AstroAuth(options = authConfig) {
 	const handler = AstroAuthHandler(prefix, authOptions)
 	return {
 		async GET(context: APIContext) {
-			return await handler(context)
+			return  await handler(context);
 		},
 		async POST(context: APIContext) {
-			return await handler(context)
+			return  await handler(context);
 		},
 	}
 }
@@ -117,7 +119,6 @@ export async function getSession(req: Request, options = authConfig): Promise<Se
 	const { status = 200 } = response
 
 	const data = await response.json()
-
 	if (!data || !Object.keys(data).length) return null
 	if (status === 200) return data
 	throw new Error(data.message)

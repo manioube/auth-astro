@@ -61,16 +61,28 @@ export async function signIn<P extends RedirectableProviderType | undefined = un
 		}),
 	})
 
-	const data = await res.clone().json()
+	const data = await res.clone().json();
+		// BELOW: added by me
+		localStorage.setItem("mydata", JSON.stringify(data)); // this gives an url
+		// ABOVE: added by me
+
+	// {"url":"https://github.com/login/oauth/authorize?scope=read%3Auser+user%3Aemail&response_type=code&client_id=Iv23limpol6f4aaELqcq&redirect_uri=http%3A%2F%2Flocalhost%3A4321%2Fapi%2Fauth%2Fcallback%2Fgithub&code_challenge=4oXuFZjpWKbH_rTAthkHcrWLR4P_che8Cj6Nusdd1I8&code_challenge_method=S256"}
+
 	const error = new URL(data.url).searchParams.get('error')
 
-	if (redirect || !isSupportingReturn || !error) {
-		// TODO: Do not redirect for Credentials and Email providers by default in next major
-		window.location.href = data.url ?? callbackUrl
-		// If url contains a hash, the browser does not reload the page. We reload manually
-		if (data.url.includes('#')) window.location.reload()
-		return
-	}
+
+			if (redirect || !isSupportingReturn || !error) {
+				// TODO: Do not redirect for Credentials and Email providers by default in next major
+				window.location.href = data.url; //?? callbackUrl
+				// when not using the callbackUrl, I get something like: http://localhost:4321/api/auth/callback/github?code=65ce038b36ecb40b8559
+				// ie, a code query string, in the next GET query
+				//TODO: grab the 'code', fetch a token with it, store the token
+				// the response header "location" prop contains the code
+				// If url contains a hash, the browser does not reload the page. We reload manually
+				if (data.url.includes('#')) window.location.reload()
+				return  // commented by me
+			}
+
 
 	return res
 }
